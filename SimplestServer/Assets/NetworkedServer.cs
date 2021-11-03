@@ -16,13 +16,15 @@ public class NetworkedServer : MonoBehaviour
     
     LinkedList<PlayerAccount> playerAccounts;
 
+    string playeraccountfilepath;
 
     // Start is called before the first frame update
     void Start()
     {
+        playeraccountfilepath = Application.dataPath + Path.DirectorySeparatorChar + "PlayerAccountData.txt";
+        
         NetworkTransport.Init();
-
-
+        
         ConnectionConfig config = new ConnectionConfig();
 
         reliableChannelID = config.AddChannel(QosType.Reliable);
@@ -33,8 +35,6 @@ public class NetworkedServer : MonoBehaviour
         hostID = NetworkTransport.AddHost(topology, socketPort, null);
         
         playerAccounts = new LinkedList<PlayerAccount>();
-    
-        
     }
 
     // Update is called once per frame
@@ -105,9 +105,10 @@ public class NetworkedServer : MonoBehaviour
             if (!isUnique)
             {
                 playerAccounts.AddLast(new PlayerAccount(n, p));
-                //what to do
-                
                 SendMessageToClient(ServerToClientSignifiers.LoginResponse + "," + LoginResponses.Success, id);
+                
+                //Save player account list!
+                SavePlayerAccounts();
             }
 
             else
@@ -124,6 +125,7 @@ public class NetworkedServer : MonoBehaviour
             string p = csv[2];
 
             bool hasBeenFound = false;
+            //bool responseHasBeenSent = false;
             
             foreach (PlayerAccount pa in playerAccounts)
             {
@@ -132,10 +134,14 @@ public class NetworkedServer : MonoBehaviour
                     if (pa.password == p)
                     {
                         SendMessageToClient(ServerToClientSignifiers.LoginResponse + "," + LoginResponses.Success, id);
+                        //bool responseHasBeenSent = true;
+
                     }
                     else
                     {
                         SendMessageToClient(ServerToClientSignifiers.LoginResponse + "," + LoginResponses.FailureIncorrectPassword, id);
+                        //bool responseHasBeenSent = true;
+
                     }
 
                     //we have found players account! do something
@@ -152,10 +158,42 @@ public class NetworkedServer : MonoBehaviour
             }
         }
     }
+    
+    private void SavePlayerAccounts()
+    {
+        StreamWriter sw = new StreamWriter(playeraccountfilepath);
 
+
+        foreach (PlayerAccount pa in playerAccounts)
+        {
+            sw.WriteLineAsync(pa.name + "," + pa.password);
+        }
+        sw.Close();
+    }
+    
+    private void LoadPlayerAccounts()
+    {
+        if (File.Exists(playeraccountfilepath))
+        {
+            StreamReader sr = new StreamReader(playeraccountfilepath);
+            string line;
+            while((line = sr.ReadLine()) != null)
+            {
+                string[] csv = line.Split(',');
+
+                PlayerAccount pa = new PlayerAccount(csv[0], csv[0]);
+                playerAccounts.AddLast(pa);
+            }
+        }
+       
+    }
 }
 
-
+public class GameSession
+{
+    //Hold two clients
+    
+}
 //set up account class
 public class PlayerAccount
 {
@@ -166,8 +204,6 @@ public class PlayerAccount
         name = Name;
         password = Password;
     }
-
-
 }
 
 public static class ClientToServerSignifiers
@@ -179,7 +215,6 @@ public static class ClientToServerSignifiers
 public static class ServerToClientSignifiers
 {
     public const int LoginResponse = 1;
-    
 }
 
 public static class LoginResponses
@@ -191,6 +226,4 @@ public static class LoginResponses
     public const int FailureNameInNotFound = 3;
 
     public const int FailureIncorrectPassword = 4;
-
-
 }
