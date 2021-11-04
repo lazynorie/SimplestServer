@@ -18,6 +18,8 @@ public class NetworkedServer : MonoBehaviour
 
     string playeraccountfilepath;
 
+    private int playerWaitingForMatch = -1;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -92,17 +94,17 @@ public class NetworkedServer : MonoBehaviour
             string n = csv[1];
             string p = csv[2];
 
-            bool isUnique = false;
+            bool isUnique = true;
             foreach (PlayerAccount pa in playerAccounts)
             {
                 if (pa.name == n)
                 {
-                    isUnique = true;
+                    isUnique = false;
                     break;
                 }
             }
             
-            if (!isUnique)
+            if (isUnique)
             {
                 playerAccounts.AddLast(new PlayerAccount(n, p));
                 SendMessageToClient(ServerToClientSignifiers.LoginResponse + "," + LoginResponses.Success, id);
@@ -117,8 +119,7 @@ public class NetworkedServer : MonoBehaviour
  
             }
         }
-
-       
+        
         else if (singifier == ClientToServerSignifiers.Login)
         {
             string n = csv[1];
@@ -157,6 +158,37 @@ public class NetworkedServer : MonoBehaviour
 
             }
         }
+        
+        else if (singifier == ClientToServerSignifiers.AddToGameSessionQueue)
+        {
+            //if there is no player waiting, save the waiting player in the above variable
+
+            if (playerWaitingForMatch == -1)
+            {
+                //make a single int variable to represent the one and only possible wating player
+                playerWaitingForMatch = id;
+            }
+            else //if  there is a waiting player , join
+            {
+                //START GAME SESSION
+                //create the game session object, pass it to two players
+                //beginning of piping
+                GameSession gs = new GameSession(playerWaitingForMatch, id);
+                
+                //pass siginifier to both clients that they've joined one
+                SendMessageToClient(ServerToClientSignifiers.GameSessionStarted + "", id);
+                SendMessageToClient(ServerToClientSignifiers.GameSessionStarted + "", playerWaitingForMatch);
+                
+                //reset game matching queue
+                playerWaitingForMatch = -1;
+            }
+        }
+        
+        else if (singifier == ClientToServerSignifiers.TicTacToePlay)
+        {
+            //
+            Debug.Log("let's play!");
+        }
     }
     
     private void SavePlayerAccounts()
@@ -191,8 +223,16 @@ public class NetworkedServer : MonoBehaviour
 
 public class GameSession
 {
+    private int playerID1, playerID2;
+
+    public GameSession(int PlayerID1, int PlayerID2)
+    {
+        playerID1 = PlayerID1;
+        playerID2 = PlayerID2;
+    }
     //Hold two clients
-    
+    //to do work item
+    //... but we are working to do it, with plan of coming back once we have a better understanding of whats going on and what we must do
 }
 //set up account class
 public class PlayerAccount
@@ -210,11 +250,15 @@ public static class ClientToServerSignifiers
 {
     public const int Login = 1;
     public const int CreateAccount = 2;
+    public const int AddToGameSessionQueue = 3;
+    public const int TicTacToePlay = 4;
 }
 
 public static class ServerToClientSignifiers
 {
     public const int LoginResponse = 1;
+
+    public const int GameSessionStarted = 2;
 }
 
 public static class LoginResponses
