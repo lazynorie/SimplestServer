@@ -20,6 +20,8 @@ public class NetworkedServer : MonoBehaviour
 
     private int playerWaitingForMatch = -1;
 
+    private LinkedList<GameSession> _gameSessions;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -37,6 +39,7 @@ public class NetworkedServer : MonoBehaviour
         hostID = NetworkTransport.AddHost(topology, socketPort, null);
         
         playerAccounts = new LinkedList<PlayerAccount>();
+        _gameSessions = new LinkedList<GameSession>();
     }
 
     // Update is called once per frame
@@ -174,6 +177,7 @@ public class NetworkedServer : MonoBehaviour
                 //create the game session object, pass it to two players
                 //beginning of piping
                 GameSession gs = new GameSession(playerWaitingForMatch, id);
+                _gameSessions.AddLast(gs);
                 
                 //pass siginifier to both clients that they've joined one
                 SendMessageToClient(ServerToClientSignifiers.GameSessionStarted + "", id);
@@ -188,6 +192,16 @@ public class NetworkedServer : MonoBehaviour
         {
             //
             Debug.Log("let's play!");
+
+            GameSession gs = FindGameSessionWithPlayerID(id);
+
+            if (gs.playerID1 == id)
+                SendMessageToClient(ServerToClientSignifiers.OpponentTicTacToePlay + "", gs.playerID2);
+            else
+                SendMessageToClient(ServerToClientSignifiers.OpponentTicTacToePlay + "", gs.playerID2);
+
+
+
         }
     }
     
@@ -219,11 +233,22 @@ public class NetworkedServer : MonoBehaviour
         }
        
     }
+
+    private GameSession FindGameSessionWithPlayerID(int id)
+    {
+        foreach (GameSession gs in _gameSessions)
+        {
+            if (gs.playerID1 == id || gs.playerID2 == id)
+                return gs;
+        }
+
+        return null;
+    }
 }
 
 public class GameSession
 {
-    private int playerID1, playerID2;
+    public int playerID1, playerID2;
 
     public GameSession(int PlayerID1, int PlayerID2)
     {
@@ -238,7 +263,7 @@ public class GameSession
 public class PlayerAccount
 {
     public string name, password;
-
+    
     public PlayerAccount(string Name, string Password)
     {
         name = Name;
@@ -259,6 +284,9 @@ public static class ServerToClientSignifiers
     public const int LoginResponse = 1;
 
     public const int GameSessionStarted = 2;
+    
+    public const int OpponentTicTacToePlay = 3;
+
 }
 
 public static class LoginResponses
