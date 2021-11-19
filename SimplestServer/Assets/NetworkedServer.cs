@@ -195,7 +195,7 @@ public class NetworkedServer : MonoBehaviour
             if (gs.playerID1 == id)
                 SendMessageToClient(ServerToClientSignifiers.OpponentTicTacToePlay + "", gs.playerID2);
             else
-                SendMessageToClient(ServerToClientSignifiers.OpponentTicTacToePlay + "", gs.playerID2);
+                SendMessageToClient(ServerToClientSignifiers.OpponentTicTacToePlay + "", gs.playerID1);
 
 
 
@@ -214,15 +214,15 @@ public class NetworkedServer : MonoBehaviour
                     SendMessageToClient(string.Join(",",ServerToClientSignifiers.SendChatToOpponent.ToString(),csv[1],csv[2]),gs.playerID1);
                 }
             }
-            else
-            {
-                gs = FindGameSessionWithPlayerID(id);
-                if (gs!=null)
-                {
-                    SendMessageToClient(string.Join(",", ServerToClientSignifiers.SendChatToOpponent.ToString(), csv[1], csv[2]), gs.playerID1);
-                    SendMessageToClient(string.Join(",", ServerToClientSignifiers.SendChatToOpponent.ToString(), csv[1], csv[2]), gs.playerID2);
-                }
-            }
+            // else
+            // {
+            //     gs = FindGameSessionWithPlayerID(id);
+            //     if (gs!=null)
+            //     {
+            //         SendMessageToClient(string.Join(",", ServerToClientSignifiers.SendChatToOpponent.ToString(), csv[1], csv[2]), gs.playerID1);
+            //         SendMessageToClient(string.Join(",", ServerToClientSignifiers.SendChatToOpponent.ToString(), csv[1], csv[2]), gs.playerID2);
+            //     }
+            // }
         }
     }
     
