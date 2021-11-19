@@ -122,7 +122,6 @@ public class NetworkedServer : MonoBehaviour
  
             }
         }
-        
         else if (singifier == ClientToServerSignifiers.Login)
         {
             string n = csv[1];
@@ -161,7 +160,6 @@ public class NetworkedServer : MonoBehaviour
 
             }
         }
-        
         else if (singifier == ClientToServerSignifiers.AddToGameSessionQueue)
         {
             //if there is no player waiting, save the waiting player in the above variable
@@ -187,7 +185,6 @@ public class NetworkedServer : MonoBehaviour
                 playerWaitingForMatch = -1;
             }
         }
-        
         else if (singifier == ClientToServerSignifiers.TicTacToePlay)
         {
             //
@@ -202,6 +199,30 @@ public class NetworkedServer : MonoBehaviour
 
 
 
+        }
+        else if (singifier == ClientToServerSignifiers.PlayerMessage)
+        {
+            GameSession gs = FindGameSessionWithPlayerID(id);
+            if (gs!=null)
+            {
+                if (gs.playerID1 == id)
+                {
+                    SendMessageToClient(string.Join(",",ServerToClientSignifiers.SendChatToOpponent.ToString(),csv[1],csv[2]),gs.playerID2);
+                }
+                else
+                {
+                    SendMessageToClient(string.Join(",",ServerToClientSignifiers.SendChatToOpponent.ToString(),csv[1],csv[2]),gs.playerID1);
+                }
+            }
+            else
+            {
+                gs = FindGameSessionWithPlayerID(id);
+                if (gs!=null)
+                {
+                    SendMessageToClient(string.Join(",", ServerToClientSignifiers.SendChatToOpponent.ToString(), csv[1], csv[2]), gs.playerID1);
+                    SendMessageToClient(string.Join(",", ServerToClientSignifiers.SendChatToOpponent.ToString(), csv[1], csv[2]), gs.playerID2);
+                }
+            }
         }
     }
     
@@ -277,6 +298,8 @@ public static class ClientToServerSignifiers
     public const int CreateAccount = 2;
     public const int AddToGameSessionQueue = 3;
     public const int TicTacToePlay = 4;
+    public const int PlayerMessage = 5;
+    
 }
 
 public static class ServerToClientSignifiers
@@ -286,6 +309,8 @@ public static class ServerToClientSignifiers
     public const int GameSessionStarted = 2;
     
     public const int OpponentTicTacToePlay = 3;
+
+    public const int SendChatToOpponent = 4;
 
 }
 
