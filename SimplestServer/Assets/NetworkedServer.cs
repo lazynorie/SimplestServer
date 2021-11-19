@@ -110,7 +110,7 @@ public class NetworkedServer : MonoBehaviour
             if (isUnique)
             {
                 playerAccounts.AddLast(new PlayerAccount(n, p));
-                SendMessageToClient(ServerToClientSignifiers.LoginResponse + "," + LoginResponses.Success, id);
+                SendMessageToClient(ServerToClientSignifiers.LoginResponse + "," + LoginResponses.Success + "," + n, id);
                 
                 //Save player account list!
                 SavePlayerAccounts();
@@ -136,7 +136,7 @@ public class NetworkedServer : MonoBehaviour
                 {
                     if (pa.password == p)
                     {
-                        SendMessageToClient(ServerToClientSignifiers.LoginResponse + "," + LoginResponses.Success, id);
+                        SendMessageToClient(ServerToClientSignifiers.LoginResponse + "," + LoginResponses.Success + "," + n, id);
                         //bool responseHasBeenSent = true;
 
                     }
@@ -180,6 +180,13 @@ public class NetworkedServer : MonoBehaviour
                 //pass siginifier to both clients that they've joined one
                 SendMessageToClient(ServerToClientSignifiers.GameSessionStarted + "", id);
                 SendMessageToClient(ServerToClientSignifiers.GameSessionStarted + "", playerWaitingForMatch);
+
+                int playerWaitingForMatchMovesFirst = Random.Range(0, 2);
+                int currentPlayersMove = (playerWaitingForMatchMovesFirst == 1)?0:1;
+                
+                // SendMessageToClient(string.Join(",",ServerToClientSignifiers.GameSessionStarted.ToString(), playerWaitingForMatchMovesFirst), playerWaitingForMatch);
+                // SendMessageToClient(string.Join(",", ServerToClientSignifiers.GameSessionStarted, currentPlayersMove) + "", id);
+
                 
                 //reset game matching queue
                 playerWaitingForMatch = -1;
@@ -265,6 +272,8 @@ public class NetworkedServer : MonoBehaviour
 
         return null;
     }
+
+   
 }
 
 public class GameSession
@@ -311,6 +320,8 @@ public static class ServerToClientSignifiers
     public const int OpponentTicTacToePlay = 3;
 
     public const int SendChatToOpponent = 4;
+
+    public const int PlayerDC = 5;
 
 }
 
