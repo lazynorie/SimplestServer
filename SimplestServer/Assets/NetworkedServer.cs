@@ -206,7 +206,7 @@ public class NetworkedServer : MonoBehaviour
         }*/
         else if (singifier ==  ClientToServerSignifiers.TicTacToePlayMade)
         {
-            //csv[0]siginifier  csv[1]which button   csv[2]shape
+            //csv[0]siginifier  csv[1]which button   csv[2]change my turn  csv[3]tell server it's opponent's turn
             GameSession gs = FindGameSessionWithPlayerID(id);
             
             if (gs.playerID1 ==id)
@@ -241,6 +241,21 @@ public class NetworkedServer : MonoBehaviour
             //         SendMessageToClient(string.Join(",", ServerToClientSignifiers.SendChatToOpponent.ToString(), csv[1], csv[2]), gs.playerID2);
             //     }
             // }
+        }
+        else if (singifier == ClientToServerSignifiers.WinMsg)
+        {
+            GameSession gs = FindGameSessionWithPlayerID(id);
+            if (gs!=null)
+            {
+                if (gs.playerID1 == id)
+                {
+                    SendMessageToClient(ServerToClientSignifiers.GGMsg.ToString(),gs.playerID2);
+                }
+                else
+                {
+                    SendMessageToClient(ServerToClientSignifiers.GGMsg.ToString(),gs.playerID1);
+                }
+            }
         }
     }
     
@@ -320,7 +335,7 @@ public static class ClientToServerSignifiers
     public const int TicTacToePlay = 4;
     public const int PlayerMessage = 5;
     public const int TicTacToePlayMade = 6;
-
+    public const int WinMsg = 7;
     
 }
 
@@ -335,6 +350,8 @@ public static class ServerToClientSignifiers
     public const int SendChatToOpponent = 4;
 
     public const int PlayerDC = 5;
+
+    public const int GGMsg = 6;
 
 }
 
