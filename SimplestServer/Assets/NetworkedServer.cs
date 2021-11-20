@@ -178,21 +178,21 @@ public class NetworkedServer : MonoBehaviour
                 _gameSessions.AddLast(gs);
                 
                 //pass siginifier to both clients that they've joined one
-                SendMessageToClient(ServerToClientSignifiers.GameSessionStarted + "", id);
-                SendMessageToClient(ServerToClientSignifiers.GameSessionStarted + "", playerWaitingForMatch);
+                // SendMessageToClient(ServerToClientSignifiers.GameSessionStarted + "", id);
+                // SendMessageToClient(ServerToClientSignifiers.GameSessionStarted + "", playerWaitingForMatch);
 
                 int playerWaitingForMatchMovesFirst = Random.Range(0, 2);
                 int currentPlayersMove = (playerWaitingForMatchMovesFirst == 1)?0:1;
                 
-                // SendMessageToClient(string.Join(",",ServerToClientSignifiers.GameSessionStarted.ToString(), playerWaitingForMatchMovesFirst), playerWaitingForMatch);
-                // SendMessageToClient(string.Join(",", ServerToClientSignifiers.GameSessionStarted, currentPlayersMove) + "", id);
+                SendMessageToClient(string.Join(",",ServerToClientSignifiers.GameSessionStarted.ToString(), playerWaitingForMatchMovesFirst), playerWaitingForMatch);
+                SendMessageToClient(string.Join(",", ServerToClientSignifiers.GameSessionStarted.ToString(), currentPlayersMove) + "", id);
 
                 
                 //reset game matching queue
                 playerWaitingForMatch = -1;
             }
         }
-        else if (singifier == ClientToServerSignifiers.TicTacToePlay)
+        /*else if (singifier == ClientToServerSignifiers.TicTacToePlay)
         {
             //
             Debug.Log("let's play!");
@@ -203,9 +203,20 @@ public class NetworkedServer : MonoBehaviour
                 SendMessageToClient(ServerToClientSignifiers.OpponentTicTacToePlay + "", gs.playerID2);
             else
                 SendMessageToClient(ServerToClientSignifiers.OpponentTicTacToePlay + "", gs.playerID1);
-
-
-
+        }*/
+        else if (singifier ==  ClientToServerSignifiers.TicTacToePlayMade)
+        {
+            //csv[0]siginifier  csv[1]which button   csv[2]shape
+            GameSession gs = FindGameSessionWithPlayerID(id);
+            
+            if (gs.playerID1 ==id)
+            {
+                SendMessageToClient(string.Join(",",ServerToClientSignifiers.OpponentTicTacToePlay.ToString(),csv[1],csv[2],csv[3]),gs.playerID2);
+            }
+            else
+            {
+                SendMessageToClient(string.Join(",",ServerToClientSignifiers.OpponentTicTacToePlay.ToString(),csv[1],csv[2],csv[3]),gs.playerID1);
+            }
         }
         else if (singifier == ClientToServerSignifiers.PlayerMessage)
         {
@@ -308,6 +319,8 @@ public static class ClientToServerSignifiers
     public const int AddToGameSessionQueue = 3;
     public const int TicTacToePlay = 4;
     public const int PlayerMessage = 5;
+    public const int TicTacToePlayMade = 6;
+
     
 }
 
