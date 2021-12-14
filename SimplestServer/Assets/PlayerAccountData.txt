@@ -4,6 +4,12 @@ o1,o1
 player1,player1
 player2,player2
 123,123
-observer1,123
-playerone,123
-playertwo,123
+observer1,observer1
+playerone,playerone
+playertwo,playertwo
+nimasile,nimasile
+hahaha,hahaha
+1234,1234
+12345,12345
+123456,123
+4321,123
